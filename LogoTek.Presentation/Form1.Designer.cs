@@ -84,7 +84,7 @@
             txtBoxDbConnectionString.Name = "txtBoxDbConnectionString";
             txtBoxDbConnectionString.Size = new Size(760, 27);
             txtBoxDbConnectionString.TabIndex = 4;
-            txtBoxDbConnectionString.Text = "Server=DESKTOP-MP1J8TM\\SQLEXPRESS01;Database=LogoTek;User Id=sa;Password=sa\r\n;TrustServerCertificate=True";
+            txtBoxDbConnectionString.Text = "Server=DESKTOP-MP1J8TM\\SQLEXPRESS01;Database=LogoTek;User Id=sa;Password=sa\r\n;TrustServerCertificate=True;";
             // 
             // label1
             // 
