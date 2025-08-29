@@ -67,7 +67,7 @@ namespace LogoTek.Persistance.Database
             string insertQuery = @"INSERT INTO [dbo].[Telegrams]
            ([PROCESS],[SEQNUM],[TELDT],[TELTYPE],[TELLEN],[IDSNDR],[IDRCVR],[STATUS],[PAYLOAD]) VALUES (@PROCESS,@SEQNUM,@TELDT,@TELTYPE,@TELLEN,@IDSNDR,@IDRCVR,@STATUS,@PAYLOAD)";
 
-            var result = connection.ExecuteAsync(insertQuery, new
+            var result = await connection.ExecuteAsync(insertQuery, new
             {
                 data.Process,
                 data.SeqNum,
