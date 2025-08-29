@@ -40,6 +40,7 @@ namespace LogoTek.Presentation
             catch (Exception exc)
             {
                 MessageBox.Show(exc.ToString());
+                throw;
             }
         }
 

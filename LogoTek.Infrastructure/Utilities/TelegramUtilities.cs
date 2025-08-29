@@ -19,7 +19,7 @@ namespace LogoTek.Infrastructure.Utilities
             return telegramHeader;
         }
 
-        private static byte[] RemoveZeros(byte[] arr)
+        public static byte[] RemoveZeros(byte[] arr)
         {
             return arr.Where(b => b != 0).ToArray();
         }
