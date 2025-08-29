@@ -78,7 +78,6 @@
             btnConnect.TabIndex = 4;
             btnConnect.Text = "Connect";
             btnConnect.UseVisualStyleBackColor = true;
-            btnConnect.Click += async (sender,e)=> await btnConnect_Click(sender,e);
             // 
             // btnDisconnect
             // 

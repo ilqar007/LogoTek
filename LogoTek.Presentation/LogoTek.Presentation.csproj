@@ -9,7 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LogoTek.Application\LogoTek.Application.csproj" />
     <ProjectReference Include="..\LogoTek.Infrastructure\LogoTek.Infrastructure.csproj" />
+    <ProjectReference Include="..\LogoTek.Persistance\LogoTek.Persistance.csproj" />
   </ItemGroup>
 
 </Project>

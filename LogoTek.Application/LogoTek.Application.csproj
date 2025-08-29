@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LogoTek.Domain\LogoTek.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

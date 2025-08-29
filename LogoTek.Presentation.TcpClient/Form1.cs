@@ -9,11 +9,12 @@ namespace LogoTek.Presentation.TcpClient
         private MyTcpClient _client;
         private bool _isTcpClientDisposed;
         private int sequenceNumber;
-        private IList<int> sequences = new List<int>(); //sequenceNumbers
+        private IDictionary<int, StatusTelegramDto> statusesToSend = new Dictionary<int, StatusTelegramDto>(); //sequenceNumber,StatusTelegramDto
 
         public Form1()
         {
             InitializeComponent();
+            btnConnect.Click += async (sender, e) => await btnConnect_Click(sender, e);
             _client = new MyTcpClient();
             _client.MessageReceived += Server_MessageReceived;
         }
@@ -36,25 +37,23 @@ namespace LogoTek.Presentation.TcpClient
             txtBoxServerPort.Enabled = false;
             btnDisconnect.Enabled = true;
             btnConnect.Enabled = false;
-            sequenceNumber = 1;
 
             while (!_isTcpClientDisposed)
             {
-                sequences.Add(sequenceNumber);
-                TelegramHeaderDto telegramHeader = new TelegramHeaderDto('#', 82, "CTS_TRANSP", DateTime.Now.Date.ToString("yyyyMMdd"), DateTime.Now.ToString("HHmmss"), "C501", "WMS", sequenceNumber);
-                StatusTelegramDto statusTelegram = new StatusTelegramDto(telegramHeader, "field row place", 999999, 999999, 9999, '\n');
-                _client.SendMessage(statusTelegram.ToByteArray());
-                await Task.Delay(5000);
-
-                var key = sequences.FirstOrDefault();
-                if (key != 0)
+                StatusTelegramDto statusTelegram;
+                if (statusesToSend.Any())
                 {
-                    sequenceNumber = key;
+                    statusTelegram = statusesToSend.First().Value;
                 }
                 else
                 {
                     sequenceNumber++;
+                    TelegramHeaderDto telegramHeader = new TelegramHeaderDto('#', 82, "CTS_TRANSP", DateTime.Now.Date.ToString("yyyyMMdd"), DateTime.Now.ToString("HHmmss"), "C501", "WMS", sequenceNumber);
+                    statusTelegram = new StatusTelegramDto(telegramHeader, "field row place", 999999, 999999, 9999, '\n');
+                    statusesToSend.Add(telegramHeader.SequenceNumber, statusTelegram);
                 }
+                _client.SendMessage(statusTelegram.ToByteArray());
+                await Task.Delay(5000);
             }
         }
 
@@ -63,7 +62,7 @@ namespace LogoTek.Presentation.TcpClient
             AcknowledgeTelegramDto acknowledgeTelegramDto = message.ExtractAcknowledgeTelegramDto();
             if (acknowledgeTelegramDto.Acknowledge == "ACK")
             {
-                sequences.Remove(acknowledgeTelegramDto.TelegramHeader.SequenceNumber);
+                statusesToSend.Remove(acknowledgeTelegramDto.TelegramHeader.SequenceNumber);
             }
         }
 
