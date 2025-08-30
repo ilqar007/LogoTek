@@ -92,7 +92,7 @@ namespace TCP_Server
                 }
                 else
                 {
-                    acknowledgeTelegramDto = new AcknowledgeTelegramDto(headerDto, "NACK", $"Error", '\n');
+                    acknowledgeTelegramDto = new AcknowledgeTelegramDto(headerDto, "NACK", $"Not savded to db", '\n');
                 }
                 ReceivedTelegramsStatuses.Remove(headerDto.SequenceNumber);
                 byte[] response = acknowledgeTelegramDto.ToByteArray();

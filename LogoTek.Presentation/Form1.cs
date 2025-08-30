@@ -79,7 +79,7 @@ namespace LogoTek.Presentation
             try
             {
                 IDatabaseManager databaseManager = new DatabaseManager(txtBoxDbConnectionString.Text);
-                IEnumerable<Telegram> telegrams = await databaseManager.GetDataAsync().ConfigureAwait(false);
+                IEnumerable<Telegram> telegrams = await databaseManager.GetDataAsync();
                 listBoxTelegrams.Items.Clear();
                 foreach (var telegram in telegrams)
                 {
@@ -95,6 +95,8 @@ namespace LogoTek.Presentation
         private void listBoxTelegrams_Click(object sender, EventArgs e)
         {
             Telegram obj = listBoxTelegrams.SelectedItem as Telegram;
+            if (obj == null) return;
+
             StatusTelegramDto statusTelegram = obj.Payload.ExtractStatusTelegramDto();
             txtBoxPosX.Text = statusTelegram.PosX.ToString();
             txtBoxPosY.Text = statusTelegram.PosY.ToString();
@@ -107,6 +109,7 @@ namespace LogoTek.Presentation
             {
                 IDatabaseManager databaseManager = new DatabaseManager(txtBoxDbConnectionString.Text);
                 await databaseManager.CreateTableAsync().ConfigureAwait(false);
+                MessageBox.Show("Table created.");
             }
             catch (Exception exc)
             {
