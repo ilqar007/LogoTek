@@ -1,6 +1,7 @@
 using LogoTek.Application.Infrastructure.DatabaseManager;
 using LogoTek.Domain.Models;
 using LogoTek.Infrastructure.Dto;
+using LogoTek.Infrastructure.Enums;
 using LogoTek.Infrastructure.Utilities;
 using LogoTek.Persistance.Database;
 using TCP_Server;
@@ -15,9 +16,9 @@ namespace LogoTek.Presentation
         public Form1()
         {
             InitializeComponent();
-            btnStartServer.Click += async (sender, e) => await btnStartServer_Click(sender, e);
-            btnListTelegrams.Click += async (sender, e) => await btnListTelegrams_Click(sender, e);
-            btnCreateSqlTable.Click += async (sender, e) => await btnCreateSqlTable_Click(sender, e);
+            btnStartServer.Click += async (sender, e) => await btnStartServer_Click(sender, e).ConfigureAwait(false);
+            btnListTelegrams.Click += async (sender, e) => await btnListTelegrams_Click(sender, e).ConfigureAwait(false);
+            btnCreateSqlTable.Click += async (sender, e) => await btnCreateSqlTable_Click(sender, e).ConfigureAwait(false);
         }
 
         private async Task SaveTelegramToDb(StatusTelegramDto statusTelegram)
@@ -27,20 +28,22 @@ namespace LogoTek.Presentation
             telegram.Tellen = (short)telegram.Payload.Length;
             telegram.Teldt = DateTime.TryParseExact($"{statusTelegram.TelegramHeader.Date}{statusTelegram.TelegramHeader.Time}", "yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture,
                            System.Globalization.DateTimeStyles.None, out DateTime dateTime) ? dateTime : DateTime.MinValue;
-            await databaseManager.SaveDataAsync(telegram);
+            await databaseManager.SaveDataAsync(telegram).ConfigureAwait(false);
         }
 
         private async Task TelegramReceived(object sender, byte[] message)
         {
+            StatusTelegramDto statusTelegramDto = message.ExtractStatusTelegramDto();
             try
             {
-                StatusTelegramDto statusTelegramDto = message.ExtractStatusTelegramDto();
-                await SaveTelegramToDb(statusTelegramDto);
+                _server!.ReceivedTelegramsStatuses[statusTelegramDto.TelegramHeader.SequenceNumber] = TelegramProcessStatus.InProcess;
+                await SaveTelegramToDb(statusTelegramDto).ConfigureAwait(false);
+                _server.ReceivedTelegramsStatuses[statusTelegramDto.TelegramHeader.SequenceNumber] = TelegramProcessStatus.Success;
             }
             catch (Exception exc)
             {
                 MessageBox.Show(exc.ToString());
-                throw;
+                _server!.ReceivedTelegramsStatuses[statusTelegramDto.TelegramHeader.SequenceNumber] = TelegramProcessStatus.Failure;
             }
         }
 
@@ -51,7 +54,7 @@ namespace LogoTek.Presentation
                 try
                 {
                     _server = new MyTcpServer(txtBoxServerIpAddress.Text, int.TryParse(txtBoxServerPort.Text, out int port) ? port : 8083);
-                    _server.TelegramReceived += async (sender, message) => await TelegramReceived(sender, message);
+                    _server.TelegramReceived += async (sender, message) => await TelegramReceived(sender, message).ConfigureAwait(false);
                     btnStartServer.Text = "Stop server";
                     _serverConnected = true;
                     await _server.Start();
@@ -76,7 +79,7 @@ namespace LogoTek.Presentation
             try
             {
                 IDatabaseManager databaseManager = new DatabaseManager(txtBoxDbConnectionString.Text);
-                IEnumerable<Telegram> telegrams = await databaseManager.GetDataAsync();
+                IEnumerable<Telegram> telegrams = await databaseManager.GetDataAsync().ConfigureAwait(false);
                 listBoxTelegrams.Items.Clear();
                 foreach (var telegram in telegrams)
                 {
@@ -103,7 +106,7 @@ namespace LogoTek.Presentation
             try
             {
                 IDatabaseManager databaseManager = new DatabaseManager(txtBoxDbConnectionString.Text);
-                await databaseManager.CreateTableAsync();
+                await databaseManager.CreateTableAsync().ConfigureAwait(false);
             }
             catch (Exception exc)
             {

@@ -1,4 +1,5 @@
 ﻿using LogoTek.Infrastructure.Dto;
+using LogoTek.Infrastructure.Enums;
 using LogoTek.Infrastructure.Utilities;
 using System.Diagnostics;
 using System.Net;
@@ -13,6 +14,8 @@ namespace TCP_Server
         private readonly int _port;
 
         public event EventHandler<byte[]> TelegramReceived;
+
+        public IDictionary<int, TelegramProcessStatus> ReceivedTelegramsStatuses = new Dictionary<int, TelegramProcessStatus>();
 
         public int Port => _port;
 
@@ -44,8 +47,8 @@ namespace TCP_Server
             while (true)
             {
                 // Handle new client connection
-                TcpClient client = await _server.AcceptTcpClientAsync();
-                _ = HandleClientAsync(client);
+                TcpClient client = await _server.AcceptTcpClientAsync().ConfigureAwait(false);
+                _ = HandleClientAsync(client).ConfigureAwait(false);
             }
         }
 
@@ -64,7 +67,7 @@ namespace TCP_Server
             // Receive data in a loop until the client disconnects
             while (true)
             {
-                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
 
                 if (bytesRead == 0)
                 {
@@ -72,18 +75,26 @@ namespace TCP_Server
                 }
 
                 AcknowledgeTelegramDto acknowledgeTelegramDto;
+                TelegramHeaderDto headerDto = buffer.ExtractTelegramHeaderDto();
 
-                try
-                {
-                    // Raise the MessageReceived event
-                    OnMessageReceived(buffer);
-                    acknowledgeTelegramDto = new AcknowledgeTelegramDto(buffer.ExtractTelegramHeaderDto(), "ACK", "All good", '\n');
-                }
-                catch (Exception exc)
-                {
-                    acknowledgeTelegramDto = new AcknowledgeTelegramDto(buffer.ExtractTelegramHeaderDto(), "NACK", $"{exc.Message}", '\n'); ;
-                }
+                // Raise the MessageReceived event
+                var status = TelegramProcessStatus.ToBeProcessed;
+                ReceivedTelegramsStatuses[headerDto.SequenceNumber] = status;
+                OnMessageReceived(buffer);
 
+                while (status == TelegramProcessStatus.ToBeProcessed || status == TelegramProcessStatus.InProcess)
+                {
+                    status = ReceivedTelegramsStatuses[headerDto.SequenceNumber];
+                }
+                if (status == TelegramProcessStatus.Success)
+                {
+                    acknowledgeTelegramDto = new AcknowledgeTelegramDto(headerDto, "ACK", "All good", '\n');
+                }
+                else
+                {
+                    acknowledgeTelegramDto = new AcknowledgeTelegramDto(headerDto, "NACK", $"Error", '\n');
+                }
+                ReceivedTelegramsStatuses.Remove(headerDto.SequenceNumber);
                 byte[] response = acknowledgeTelegramDto.ToByteArray();
 
                 await stream.WriteAsync(response, 0, response.Length);

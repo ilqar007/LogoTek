@@ -32,9 +32,9 @@ namespace LogoTek.Persistance.Database
                 ) ON [PRIMARY]
                 """;
 
-            await using var connection = new SqlConnection(_sqlConnection);
-            await connection.OpenAsync();
-            await connection.ExecuteAsync(query);
+            using var connection = new SqlConnection(_sqlConnection);
+            await connection.OpenAsync().ConfigureAwait(false);
+            await connection.ExecuteAsync(query).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<Telegram>> GetDataAsync()
@@ -53,16 +53,16 @@ namespace LogoTek.Persistance.Database
                 FROM [dbo].[Telegrams]
                 """;
 
-            await using var connection = new SqlConnection(_sqlConnection);
-            await connection.OpenAsync();
+            using var connection = new SqlConnection(_sqlConnection);
+            await connection.OpenAsync().ConfigureAwait(false);
 
-            return await connection.QueryAsync<Telegram>(query);
+            return await connection.QueryAsync<Telegram>(query).ConfigureAwait(false);
         }
 
         public async Task SaveDataAsync(Telegram data)
         {
-            await using var connection = new SqlConnection(_sqlConnection);
-            await connection.OpenAsync();
+            using var connection = new SqlConnection(_sqlConnection);
+            await connection.OpenAsync().ConfigureAwait(false);
 
             string insertQuery = @"INSERT INTO [dbo].[Telegrams]
            ([PROCESS],[SEQNUM],[TELDT],[TELTYPE],[TELLEN],[IDSNDR],[IDRCVR],[STATUS],[PAYLOAD]) VALUES (@PROCESS,@SEQNUM,@TELDT,@TELTYPE,@TELLEN,@IDSNDR,@IDRCVR,@STATUS,@PAYLOAD)";
@@ -78,7 +78,7 @@ namespace LogoTek.Persistance.Database
                 data.Idrcvr,
                 data.Status,
                 data.Payload,
-            });
+            }).ConfigureAwait(false);
         }
     }
 }
