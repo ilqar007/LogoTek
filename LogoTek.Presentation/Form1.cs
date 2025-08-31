@@ -28,16 +28,17 @@ namespace LogoTek.Presentation
         private async Task TelegramReceived(object sender, byte[] message)
         {
             StatusTelegramDto statusTelegramDto = message.ExtractStatusTelegramDto();
+            int seqNum = statusTelegramDto.TelegramHeader.SequenceNumber;
             try
             {
-                _server!.ReceivedTelegramsStatuses[statusTelegramDto.TelegramHeader.SequenceNumber] = TelegramProcessStatus.InProcess;
+                _server!.ReceivedTelegramsStatuses[seqNum] = TelegramProcessStatus.InProcess;
                 await _telegramService.SaveAsync(statusTelegramDto).ConfigureAwait(false);
-                _server.ReceivedTelegramsStatuses[statusTelegramDto.TelegramHeader.SequenceNumber] = TelegramProcessStatus.Success;
+                _server.ReceivedTelegramsStatuses[seqNum] = TelegramProcessStatus.Success;
             }
             catch (Exception exc)
             {
                 MessageBox.Show(exc.ToString());
-                _server!.ReceivedTelegramsStatuses[statusTelegramDto.TelegramHeader.SequenceNumber] = TelegramProcessStatus.Failure;
+                _server!.ReceivedTelegramsStatuses[seqNum] = TelegramProcessStatus.Failure;
             }
         }
 

@@ -84,7 +84,14 @@ namespace TCP_Server
 
                 while (status == TelegramProcessStatus.ToBeProcessed || status == TelegramProcessStatus.InProcess)
                 {
-                    status = ReceivedTelegramsStatuses[headerDto.SequenceNumber];
+                    if (ReceivedTelegramsStatuses.TryGetValue(headerDto.SequenceNumber, out TelegramProcessStatus processStatus))
+                    {
+                        status = processStatus;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 if (status == TelegramProcessStatus.Success)
                 {
@@ -92,7 +99,7 @@ namespace TCP_Server
                 }
                 else
                 {
-                    acknowledgeTelegramDto = new AcknowledgeTelegramDto(headerDto, "NACK", $"Not savded to db", '\n');
+                    acknowledgeTelegramDto = new AcknowledgeTelegramDto(headerDto, "NACK", $"something wrong", '\n');
                 }
                 ReceivedTelegramsStatuses.Remove(headerDto.SequenceNumber);
                 byte[] response = acknowledgeTelegramDto.ToByteArray();
