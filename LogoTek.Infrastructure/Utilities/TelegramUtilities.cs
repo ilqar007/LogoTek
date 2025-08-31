@@ -107,7 +107,7 @@ namespace LogoTek.Infrastructure.Utilities
             return statusTelegramDto;
         }
 
-        public static string ToASCIIString(this byte[] telegram)
+        private static string ToASCIIString(byte[] telegram)
         {
             return System.Text.Encoding.ASCII.GetString(telegram).Trim('\0');
         }
