@@ -39,9 +39,6 @@
             txtBoxPosX = new TextBox();
             txtBoxPosY = new TextBox();
             txtBoxPosZ = new TextBox();
-            label2 = new Label();
-            label3 = new Label();
-            label4 = new Label();
             SuspendLayout();
             // 
             // txtBoxServerIpAddress
@@ -72,9 +69,9 @@
             // listBoxTelegrams
             // 
             listBoxTelegrams.FormattingEnabled = true;
-            listBoxTelegrams.Location = new Point(240, 221);
+            listBoxTelegrams.Location = new Point(42, 223);
             listBoxTelegrams.Name = "listBoxTelegrams";
-            listBoxTelegrams.Size = new Size(459, 104);
+            listBoxTelegrams.Size = new Size(704, 104);
             listBoxTelegrams.TabIndex = 3;
             listBoxTelegrams.Click += listBoxTelegrams_Click;
             // 
@@ -97,7 +94,7 @@
             // 
             // btnListTelegrams
             // 
-            btnListTelegrams.Location = new Point(28, 221);
+            btnListTelegrams.Location = new Point(42, 180);
             btnListTelegrams.Name = "btnListTelegrams";
             btnListTelegrams.Size = new Size(162, 37);
             btnListTelegrams.TabIndex = 6;
@@ -115,60 +112,30 @@
             // 
             // txtBoxPosX
             // 
-            txtBoxPosX.Location = new Point(240, 350);
+            txtBoxPosX.Location = new Point(42, 350);
             txtBoxPosX.Name = "txtBoxPosX";
             txtBoxPosX.Size = new Size(125, 27);
             txtBoxPosX.TabIndex = 8;
             // 
             // txtBoxPosY
             // 
-            txtBoxPosY.Location = new Point(400, 350);
+            txtBoxPosY.Location = new Point(201, 351);
             txtBoxPosY.Name = "txtBoxPosY";
             txtBoxPosY.Size = new Size(125, 27);
             txtBoxPosY.TabIndex = 9;
             // 
             // txtBoxPosZ
             // 
-            txtBoxPosZ.Location = new Point(547, 350);
+            txtBoxPosZ.Location = new Point(365, 351);
             txtBoxPosZ.Name = "txtBoxPosZ";
             txtBoxPosZ.Size = new Size(125, 27);
             txtBoxPosZ.TabIndex = 10;
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(240, 328);
-            label2.Name = "label2";
-            label2.Size = new Size(40, 20);
-            label2.TabIndex = 11;
-            label2.Text = "PosX";
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(400, 328);
-            label3.Name = "label3";
-            label3.Size = new Size(39, 20);
-            label3.TabIndex = 12;
-            label3.Text = "PosY";
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Location = new Point(547, 327);
-            label4.Name = "label4";
-            label4.Size = new Size(40, 20);
-            label4.TabIndex = 13;
-            label4.Text = "PosZ";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(label4);
-            Controls.Add(label3);
-            Controls.Add(label2);
             Controls.Add(txtBoxPosZ);
             Controls.Add(txtBoxPosY);
             Controls.Add(txtBoxPosX);
@@ -199,8 +166,5 @@
         private TextBox txtBoxPosX;
         private TextBox txtBoxPosY;
         private TextBox txtBoxPosZ;
-        private Label label2;
-        private Label label3;
-        private Label label4;
     }
 }

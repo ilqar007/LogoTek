@@ -4,6 +4,7 @@ using LogoTek.Infrastructure.Dto;
 using LogoTek.Infrastructure.Enums;
 using LogoTek.Infrastructure.Utilities;
 using LogoTek.Persistance.Database;
+using System.Windows.Forms;
 using TCP_Server;
 
 namespace LogoTek.Presentation
@@ -79,12 +80,19 @@ namespace LogoTek.Presentation
             try
             {
                 IDatabaseManager databaseManager = new DatabaseManager(txtBoxDbConnectionString.Text);
-                IEnumerable<Telegram> telegrams = await databaseManager.GetDataAsync();
-                listBoxTelegrams.Items.Clear();
-                foreach (var telegram in telegrams)
+                IEnumerable<Telegram> telegrams = await databaseManager.GetDataAsync().ConfigureAwait(false);
+
+                listBoxTelegrams.Invoke((MethodInvoker)(() =>
                 {
-                    listBoxTelegrams.Items.Add(telegram);
-                }
+                    listBoxTelegrams.Items.Clear();
+                    foreach (var telegram in telegrams)
+                    {
+                        listBoxTelegrams.Items.Add(telegram);
+                    }
+                }));
+
+                
+               
             }
             catch (Exception exc)
             {

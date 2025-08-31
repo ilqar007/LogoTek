@@ -1,6 +1,4 @@
-﻿using LogoTek.Infrastructure.Utilities;
-
-namespace LogoTek.Domain.Models
+﻿namespace LogoTek.Domain.Models
 {
     public class Telegram
     {
@@ -17,7 +15,7 @@ namespace LogoTek.Domain.Models
 
         public override string ToString()
         {
-            return System.Text.Encoding.ASCII.GetString(TelegramUtilities.RemoveZeros(Payload));
+            return System.Text.Encoding.ASCII.GetString((Payload)).Replace('\0', ' ');
         }
     }
 }
