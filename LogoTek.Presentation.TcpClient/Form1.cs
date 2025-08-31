@@ -50,7 +50,7 @@ namespace LogoTek.Presentation.TcpClient
                     sequenceNumber++;
                     TelegramHeaderDto telegramHeader = new TelegramHeaderDto('#', 82, "CTS_TRANSP", DateTime.Now.Date.ToString("yyyyMMdd"), DateTime.Now.ToString("HHmmss"), "C501", "WMS", sequenceNumber);
                     statusTelegram = new StatusTelegramDto(telegramHeader, "field row place", "X999999", "Y999999", "Z9999", '\n');
-                    statusesToSend.Add(telegramHeader.SequenceNumber, statusTelegram);
+                    statusesToSend[telegramHeader.SequenceNumber] = statusTelegram;
                 }
                 _client.SendMessage(statusTelegram.ToByteArray());
                 await Task.Delay(5000);
