@@ -7,12 +7,10 @@ namespace LogoTek.Persistance.Database
 {
     public class DatabaseManager : IDatabaseManager
     {
-        private readonly string? _sqlConnection;
+        public DatabaseManager()
+        { }
 
-        public DatabaseManager(string? sqlConnection)
-        {
-            _sqlConnection = sqlConnection;
-        }
+        public string SqlConnection { get; set; }
 
         public async Task CreateTableAsync()
         {
@@ -32,7 +30,7 @@ namespace LogoTek.Persistance.Database
                 ) ON [PRIMARY]
                 """;
 
-            using var connection = new SqlConnection(_sqlConnection);
+            using var connection = new SqlConnection(SqlConnection);
             await connection.OpenAsync().ConfigureAwait(false);
             await connection.ExecuteAsync(query).ConfigureAwait(false);
         }
@@ -53,7 +51,7 @@ namespace LogoTek.Persistance.Database
                 FROM [dbo].[Telegrams]
                 """;
 
-            using var connection = new SqlConnection(_sqlConnection);
+            using var connection = new SqlConnection(SqlConnection);
             await connection.OpenAsync().ConfigureAwait(false);
 
             return await connection.QueryAsync<Telegram>(query).ConfigureAwait(false);
@@ -61,7 +59,7 @@ namespace LogoTek.Persistance.Database
 
         public async Task SaveDataAsync(Telegram data)
         {
-            using var connection = new SqlConnection(_sqlConnection);
+            using var connection = new SqlConnection(SqlConnection);
             await connection.OpenAsync().ConfigureAwait(false);
 
             string insertQuery = @"INSERT INTO [dbo].[Telegrams]

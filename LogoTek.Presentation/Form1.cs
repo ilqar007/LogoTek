@@ -1,10 +1,9 @@
 using LogoTek.Application.Infrastructure.DatabaseManager;
-using LogoTek.Domain.Models;
-using LogoTek.Infrastructure.Dto;
-using LogoTek.Infrastructure.Enums;
-using LogoTek.Infrastructure.Utilities;
+using LogoTek.Application.Infrastructure.Dto;
+using LogoTek.Application.Infrastructure.Enums;
+using LogoTek.Application.Infrastructure.Extensions;
+using LogoTek.Application.Infrastructure.Services;
 using LogoTek.Persistance.Database;
-using System.Windows.Forms;
 using TCP_Server;
 
 namespace LogoTek.Presentation
@@ -13,23 +12,17 @@ namespace LogoTek.Presentation
     {
         private MyTcpServer? _server;
         private bool _serverConnected = false;
+        private readonly IDatabaseManager _databaseManager;
+        private readonly ITelegramService _telegramService;
 
-        public Form1()
+        public Form1(IDatabaseManager databaseManager, ITelegramService telegramService)
         {
             InitializeComponent();
             btnStartServer.Click += async (sender, e) => await btnStartServer_Click(sender, e).ConfigureAwait(false);
             btnListTelegrams.Click += async (sender, e) => await btnListTelegrams_Click(sender, e).ConfigureAwait(false);
             btnCreateSqlTable.Click += async (sender, e) => await btnCreateSqlTable_Click(sender, e).ConfigureAwait(false);
-        }
-
-        private async Task SaveTelegramToDb(StatusTelegramDto statusTelegram)
-        {
-            IDatabaseManager databaseManager = new DatabaseManager(txtBoxDbConnectionString.Text);
-            Telegram telegram = new Telegram { Idrcvr = statusTelegram.TelegramHeader.Receiver, Idsndr = statusTelegram.TelegramHeader.Sender, Payload = statusTelegram.ToByteArray(), Process = "CTS", SeqNum = (short)statusTelegram.TelegramHeader.SequenceNumber, Status = true, Teltype = "WMS_MATINF" };
-            telegram.Tellen = (short)telegram.Payload.Length;
-            telegram.Teldt = DateTime.TryParseExact($"{statusTelegram.TelegramHeader.Date}{statusTelegram.TelegramHeader.Time}", "yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture,
-                           System.Globalization.DateTimeStyles.None, out DateTime dateTime) ? dateTime : DateTime.MinValue;
-            await databaseManager.SaveDataAsync(telegram).ConfigureAwait(false);
+            _databaseManager = databaseManager;
+            _telegramService = telegramService;
         }
 
         private async Task TelegramReceived(object sender, byte[] message)
@@ -38,7 +31,7 @@ namespace LogoTek.Presentation
             try
             {
                 _server!.ReceivedTelegramsStatuses[statusTelegramDto.TelegramHeader.SequenceNumber] = TelegramProcessStatus.InProcess;
-                await SaveTelegramToDb(statusTelegramDto).ConfigureAwait(false);
+                await _telegramService.SaveAsync(statusTelegramDto).ConfigureAwait(false);
                 _server.ReceivedTelegramsStatuses[statusTelegramDto.TelegramHeader.SequenceNumber] = TelegramProcessStatus.Success;
             }
             catch (Exception exc)
@@ -54,6 +47,7 @@ namespace LogoTek.Presentation
             {
                 try
                 {
+                    SetDBConnectionString();
                     _server = new MyTcpServer(txtBoxServerIpAddress.Text, int.TryParse(txtBoxServerPort.Text, out int port) ? port : 8083);
                     _server.TelegramReceived += async (sender, message) => await TelegramReceived(sender, message).ConfigureAwait(false);
                     btnStartServer.Text = "Stop server";
@@ -79,8 +73,8 @@ namespace LogoTek.Presentation
         {
             try
             {
-                IDatabaseManager databaseManager = new DatabaseManager(txtBoxDbConnectionString.Text);
-                IEnumerable<Telegram> telegrams = await databaseManager.GetDataAsync().ConfigureAwait(false);
+                SetDBConnectionString();
+                IEnumerable<StatusTelegramDto> telegrams = await _telegramService.GetAsync().ConfigureAwait(false);
 
                 listBoxTelegrams.Invoke((MethodInvoker)(() =>
                 {
@@ -90,9 +84,6 @@ namespace LogoTek.Presentation
                         listBoxTelegrams.Items.Add(telegram);
                     }
                 }));
-
-                
-               
             }
             catch (Exception exc)
             {
@@ -102,10 +93,9 @@ namespace LogoTek.Presentation
 
         private void listBoxTelegrams_Click(object sender, EventArgs e)
         {
-            Telegram obj = listBoxTelegrams.SelectedItem as Telegram;
-            if (obj == null) return;
+            StatusTelegramDto statusTelegram = (listBoxTelegrams.SelectedItem as StatusTelegramDto)!;
+            if (statusTelegram == null) return;
 
-            StatusTelegramDto statusTelegram = obj.Payload.ExtractStatusTelegramDto();
             txtBoxPosX.Text = statusTelegram.PosX.ToString();
             txtBoxPosY.Text = statusTelegram.PosY.ToString();
             txtBoxPosZ.Text = statusTelegram.PosZ.ToString();
@@ -115,14 +105,19 @@ namespace LogoTek.Presentation
         {
             try
             {
-                IDatabaseManager databaseManager = new DatabaseManager(txtBoxDbConnectionString.Text);
-                await databaseManager.CreateTableAsync().ConfigureAwait(false);
+                SetDBConnectionString();
+                await _databaseManager.CreateTableAsync().ConfigureAwait(false);
                 MessageBox.Show("Table created.");
             }
             catch (Exception exc)
             {
                 MessageBox.Show(exc.ToString());
             }
+        }
+
+        private void SetDBConnectionString()
+        {
+            (_databaseManager as DatabaseManager)!.SqlConnection = txtBoxDbConnectionString.Text;
         }
     }
 }

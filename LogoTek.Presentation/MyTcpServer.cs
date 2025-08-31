@@ -1,6 +1,6 @@
-﻿using LogoTek.Infrastructure.Dto;
-using LogoTek.Infrastructure.Enums;
-using LogoTek.Infrastructure.Utilities;
+﻿using LogoTek.Application.Infrastructure.Dto;
+using LogoTek.Application.Infrastructure.Enums;
+using LogoTek.Application.Infrastructure.Extensions;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;

@@ -1,5 +1,5 @@
-using LogoTek.Infrastructure.Dto;
-using LogoTek.Infrastructure.Utilities;
+using LogoTek.Application.Infrastructure.Dto;
+using LogoTek.Application.Infrastructure.Extensions;
 using TCP_Client;
 
 namespace LogoTek.Presentation.TcpClient
